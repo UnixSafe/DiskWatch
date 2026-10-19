@@ -17,7 +17,9 @@ se met à gonfler.</sub>
 [![Sans dépendance](https://img.shields.io/badge/d%C3%A9pendances-aucune-2ea44f)](#architecture)
 [![Licence MIT](https://img.shields.io/badge/licence-MIT-blue)](LICENSE)
 
-<img src="docs/demo.gif" alt="Démonstration de DiskWatch" width="420">
+<img src="docs/motion.gif" alt="DiskWatch en mouvement" width="680">
+
+<sub>Illustration animée. Les captures de l'interface réelle sont plus bas.</sub>
 
 </div>
 
@@ -124,6 +126,13 @@ Clic gauche sur l'icône de la barre :
 - **copie du rapport** en texte dans le presse-papiers.
 
 Clic droit : menu contextuel avec réglages, rapport, analyse immédiate, quitter.
+
+Le même panneau filmé, puis les réglages — cette fois ce sont de vraies captures
+d'écran de l'application :
+
+<div align="center">
+<img src="docs/demo.gif" alt="Captures de DiskWatch en fonctionnement" width="420">
+</div>
 
 La vue 30 jours raconte ce que les 24 heures ne montrent pas — ici une dérive
 lente, puis un grand nettoyage :
@@ -259,6 +268,7 @@ Sources/
 Resources/
   make-icon.swift            dessine l'icône de l'application
   make-icns.sh               assemble le .icns dans toutes les tailles
+  make-motion.swift          rend les 120 images de l'illustration animée
 
 build.sh                     compile, fabrique le bundle, signe
 make-dmg.sh                  fabrique l'image disque de distribution

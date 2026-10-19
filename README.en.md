@@ -16,7 +16,9 @@ temporary directories — and alerts you the moment a folder starts swelling.</s
 [![No dependencies](https://img.shields.io/badge/dependencies-none-2ea44f)](#architecture)
 [![MIT licence](https://img.shields.io/badge/licence-MIT-blue)](LICENSE)
 
-<img src="docs/demo.gif" alt="DiskWatch demo" width="420">
+<img src="docs/motion.gif" alt="DiskWatch in motion" width="680">
+
+<sub>Animated illustration. Screenshots of the real interface are further down.</sub>
 
 </div>
 
@@ -123,6 +125,13 @@ Left-click the menu bar icon:
 - **report copied** as plain text to the clipboard.
 
 Right-click: context menu with settings, report, scan now, quit.
+
+The same panel in motion, then the settings — these are actual screen captures
+of the application:
+
+<div align="center">
+<img src="docs/demo.gif" alt="DiskWatch screen captures" width="420">
+</div>
 
 The 30-day view shows what 24 hours cannot — here a slow drift, then a big
 cleanup:
@@ -255,6 +264,7 @@ Sources/
 Resources/
   make-icon.swift            draws the application icon
   make-icns.sh               assembles the .icns at every size
+  make-motion.swift          renders the 120 frames of the animated illustration
 
 build.sh                     compiles, builds the bundle, signs
 make-dmg.sh                  builds the distribution disk image
