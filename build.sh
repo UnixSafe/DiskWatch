@@ -18,12 +18,18 @@ swiftc -O -target "$TARGET" \
   -o "$SRC_DIR/.build/$APP_NAME" \
   $(find "$SRC_DIR/Sources" -name '*.swift' | sort)
 
+echo "▸ Icône…"
+if [ ! -f "$SRC_DIR/Resources/DiskWatch.icns" ]; then
+  "$SRC_DIR/Resources/make-icns.sh"
+fi
+
 echo "▸ Construction du bundle…"
 pkill -x "$APP_NAME" 2>/dev/null || true
 sleep 0.5
 rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 mv "$SRC_DIR/.build/$APP_NAME" "$APP/Contents/MacOS/$APP_NAME"
+cp "$SRC_DIR/Resources/DiskWatch.icns" "$APP/Contents/Resources/DiskWatch.icns"
 
 cat > "$APP/Contents/Info.plist" <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>
@@ -34,6 +40,7 @@ cat > "$APP/Contents/Info.plist" <<PLIST
   <key>CFBundleDisplayName</key>       <string>$APP_NAME</string>
   <key>CFBundleIdentifier</key>        <string>com.unixsafe.diskwatch</string>
   <key>CFBundleExecutable</key>        <string>$APP_NAME</string>
+  <key>CFBundleIconFile</key>          <string>DiskWatch</string>
   <key>CFBundlePackageType</key>       <string>APPL</string>
   <key>CFBundleShortVersionString</key><string>$VERSION</string>
   <key>CFBundleVersion</key>           <string>$VERSION</string>

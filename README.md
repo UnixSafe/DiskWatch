@@ -1,6 +1,10 @@
 <div align="center">
 
+<img src="docs/icon.png" alt="DiskWatch" width="112">
+
 # DiskWatch
+
+<sub>**Français** · [English](README.en.md)</sub>
 
 **Surveillance de l'espace disque dans la barre de menus macOS,
 avec alerte dès qu'un dossier se met à gonfler.**
@@ -30,6 +34,29 @@ Swift Charts et `du`. 1 892 lignes, un binaire de **903 Ko**.
 
 ## Installation
 
+### Image disque
+
+Téléchargez le `.dmg` depuis la [dernière
+version](https://github.com/UnixSafe/DiskWatch/releases/latest), puis glissez
+DiskWatch dans Applications.
+
+<div align="center">
+<img src="docs/install.png" alt="Installation par glisser-déposer" width="430">
+</div>
+
+**Au premier lancement, macOS bloquera l'application** : elle est signée « ad
+hoc », sans certificat Developer ID. Faites un **clic droit sur DiskWatch.app ▸
+Ouvrir**, puis **Ouvrir** dans la boîte de dialogue. Une seule fois.
+
+Si le message dit que l'application est « endommagée », c'est l'attribut de mise
+en quarantaine :
+
+```bash
+xattr -dr com.apple.quarantine /Applications/DiskWatch.app
+```
+
+### Depuis les sources
+
 ```bash
 git clone https://github.com/UnixSafe/DiskWatch.git
 cd DiskWatch
@@ -37,9 +64,9 @@ cd DiskWatch
 open ~/Applications/DiskWatch.app
 ```
 
-`./build.sh /Applications` pour installer ailleurs.
-Prérequis : macOS 14 ou plus récent, et les outils en ligne de commande de Xcode
-pour `swiftc`.
+`./build.sh /Applications` pour installer ailleurs, `./make-dmg.sh` pour
+fabriquer l'image disque. Prérequis : macOS 14 ou plus récent, et les outils en
+ligne de commande de Xcode pour `swiftc`.
 
 ## Le panneau
 
@@ -190,6 +217,13 @@ Sources/
   UI/StatusIcon.swift        rendu de l'icône de barre
   UI/PanelView.swift         panneau principal
   UI/SettingsView.swift      réglages
+
+Resources/
+  make-icon.swift            dessine l'icône de l'application
+  make-icns.sh               assemble le .icns dans toutes les tailles
+
+build.sh                     compile, fabrique le bundle, signe
+make-dmg.sh                  fabrique l'image disque de distribution
 ```
 
 Les captures de ce README utilisent un jeu de données de démonstration : les

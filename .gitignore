@@ -1,3 +1,9 @@
 .build/
 *.app
+*.dmg
 .DS_Store
+
+# Artefacts d'icône régénérés par build.sh
+Resources/icon-1024.png
+Resources/DiskWatch.icns
+Resources/*.iconset/
