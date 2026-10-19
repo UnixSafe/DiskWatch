@@ -6,7 +6,7 @@ SRC_DIR="$(cd "$(dirname "$0")" && pwd)"
 APP_NAME="DiskWatch"
 DEST="${1:-$HOME/Applications}"
 APP="$DEST/$APP_NAME.app"
-VERSION="2.0"
+VERSION="2.1"
 TARGET="arm64-apple-macos14.0"
 
 echo "▸ Compilation ($(find "$SRC_DIR/Sources" -name '*.swift' | wc -l | tr -d ' ') fichiers)…"

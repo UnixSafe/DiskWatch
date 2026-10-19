@@ -14,7 +14,9 @@ struct Trend {
     /// Projection naïve : à ce rythme, combien de temps avant saturation ?
     var timeToFull: TimeInterval? {
         guard let rate = ratePerHour, rate < -100_000_000 else { return nil }
-        return Double(free) / -rate * 3600
+        let seconds = Double(free) / -rate * 3600
+        // Au-dela d'un an, extrapoler trois heures de mesures n'apprend rien.
+        return seconds < 365 * 86400 ? seconds : nil
     }
 }
 

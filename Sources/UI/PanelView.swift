@@ -221,49 +221,83 @@ struct TrendChart: View {
     let samples: [Sample]
     let color: Color
 
+    /// Bornes de l'echelle. Au moins 1 Go d'amplitude : sinon le bruit
+    /// ressemble a une falaise.
+    private var bounds: (floor: Double, ceiling: Double) {
+        let values = samples.map { Double($0.free) }
+        let lo = values.min() ?? 0
+        let hi = values.max() ?? 1
+        let pad = max((hi - lo) * 0.18, 500_000_000)
+        return (lo - pad, hi + pad)
+    }
+
     var body: some View {
         if samples.count < 2 {
-            RoundedRectangle(cornerRadius: 6)
-                .fill(.quaternary.opacity(0.4))
-                .overlay(
-                    Text("Historique en constitution…")
-                        .font(.system(size: 10))
-                        .foregroundStyle(.tertiary))
+            placeholder
         } else {
-            let values = samples.map { Double($0.free) }
-            let lo = values.min() ?? 0
-            let hi = values.max() ?? 1
-            // Au moins 1 Go d'amplitude : sinon le bruit ressemble à une falaise.
-            let pad = max((hi - lo) * 0.18, 1_000_000_000 * 0.5)
+            chart
+        }
+    }
 
-            Chart(samples) { s in
-                AreaMark(x: .value("Instant", s.date), y: .value("Libre", s.free))
-                    .interpolationMethod(.catmullRom)
-                    .foregroundStyle(.areaFill(color))
-                LineMark(x: .value("Instant", s.date), y: .value("Libre", s.free))
-                    .interpolationMethod(.catmullRom)
-                    .lineStyle(StrokeStyle(lineWidth: 1.8, lineJoin: .round))
-                    .foregroundStyle(color)
-            }
-            .chartYScale(domain: (lo - pad)...(hi + pad))
-            .chartXAxis {
-                AxisMarks(preset: .aligned, values: .automatic(desiredCount: 3)) {
-                    AxisGridLine().foregroundStyle(.quaternary.opacity(0.5))
-                    AxisValueLabel(format: .dateTime.hour().minute())
+    private var placeholder: some View {
+        RoundedRectangle(cornerRadius: 6)
+            .fill(.quaternary.opacity(0.4))
+            .overlay(
+                Text("Historique en constitution…")
+                    .font(.system(size: 10))
+                    .foregroundStyle(.tertiary))
+    }
+
+    private var chart: some View {
+        let b = bounds
+        return Chart(samples) { s in
+            // yStart explicite : sans lui l'aire descend jusqu'a zero, tres loin
+            // sous une echelle resserree, et deborde sur le reste du panneau.
+            AreaMark(x: .value("Instant", s.date),
+                     yStart: .value("Plancher", b.floor),
+                     yEnd: .value("Libre", Double(s.free)))
+                .interpolationMethod(.catmullRom)
+                .foregroundStyle(.areaFill(color))
+
+            LineMark(x: .value("Instant", s.date),
+                     y: .value("Libre", Double(s.free)))
+                .interpolationMethod(.catmullRom)
+                .lineStyle(StrokeStyle(lineWidth: 1.8, lineJoin: .round))
+                .foregroundStyle(color)
+        }
+        .chartYScale(domain: b.floor...b.ceiling)
+        // Filet de securite : catmullRom peut depasser les bornes.
+        .chartPlotStyle { $0.clipped() }
+        .chartXAxis { xAxis }
+        .chartYAxis { yAxis }
+    }
+
+    /// Duree couverte par la fenetre affichee.
+    private var span: TimeInterval {
+        guard let a = samples.first, let b = samples.last else { return 0 }
+        return b.t - a.t
+    }
+
+    private var xAxis: some AxisContent {
+        AxisMarks(preset: .aligned, values: .automatic(desiredCount: 3)) {
+            AxisGridLine().foregroundStyle(.quaternary.opacity(0.5))
+            // Au-dela d'une journee et demie, l'heure ne situe plus rien : il faut la date.
+            AxisValueLabel(format: span > 36 * 3600
+                           ? Date.FormatStyle.dateTime.day().month(.abbreviated)
+                           : Date.FormatStyle.dateTime.hour().minute())
+                .font(.system(size: 9))
+                .foregroundStyle(.secondary)
+        }
+    }
+
+    private var yAxis: some AxisContent {
+        AxisMarks(position: .trailing, values: .automatic(desiredCount: 2)) { value in
+            AxisGridLine().foregroundStyle(.quaternary.opacity(0.5))
+            AxisValueLabel {
+                if let v = value.as(Double.self) {
+                    Text(Fmt.size(Int64(v), decimals: 0))
                         .font(.system(size: 9))
-                        .foregroundStyle(.tertiary)
-                }
-            }
-            .chartYAxis {
-                AxisMarks(position: .trailing, values: .automatic(desiredCount: 2)) { value in
-                    AxisGridLine().foregroundStyle(.quaternary.opacity(0.5))
-                    AxisValueLabel {
-                        if let v = value.as(Double.self) {
-                            Text(Fmt.size(Int64(v), decimals: 0))
-                                .font(.system(size: 9))
-                                .foregroundStyle(.tertiary)
-                        }
-                    }
+                        .foregroundStyle(.secondary)
                 }
             }
         }

@@ -57,7 +57,11 @@ enum Fmt {
     static func duration(_ seconds: TimeInterval) -> String {
         if seconds < 60 { return "\(Int(seconds)) s" }
         if seconds < 3600 { return "\(Int(seconds / 60)) min" }
-        return "\(Int(seconds / 3600)) h"
+        if seconds < 48 * 3600 { return "\(Int(seconds / 3600)) h" }
+        let days = Int(seconds / 86400)
+        if days < 60 { return "\(days) j" }
+        let months = Int((seconds / 86400 / 30.44).rounded())
+        return months < 12 ? "\(months) mois" : "plus d'un an"
     }
 }
 
