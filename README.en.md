@@ -6,8 +6,10 @@
 
 <sub>[Français](README.md) · **English**</sub>
 
-**Disk space monitoring in the macOS menu bar,
-with an alert the moment a folder starts swelling.**
+**Disk space monitoring in the macOS menu bar.**
+
+<sub>Tracks what AI agents leave behind — builds, caches, virtual environments,
+temporary directories — and alerts you the moment a folder starts swelling.</sub>
 
 [![macOS 14+](https://img.shields.io/badge/macOS-14%2B-000000?logo=apple&logoColor=white)](https://www.apple.com/macos/)
 [![Swift 6](https://img.shields.io/badge/Swift-6-F05138?logo=swift&logoColor=white)](https://swift.org)
@@ -24,8 +26,40 @@ A disk almost never fills up all at once. It fills up through a forgotten build
 directory, a cache that never purges, one more Docker image. By the time macOS
 warns you, it is too late to find out **who** took the space.
 
-DiskWatch samples free space every five minutes, measures the folders you point
-it at, and warns you the moment one of them grows — not three weeks later.
+## Why now
+
+Since AI agents started writing code on our machines, this has changed scale.
+
+An agent session installs dependencies, compiles, caches, creates a virtual
+environment, launches a test browser, opens a temporary directory — then ends.
+What it left behind stays. The artefacts are usually gitignored, so `git status`
+never shows them. They are scattered across `~/.cache`, `/var/folders`,
+`node_modules`, `.venv`, `target`, `dist`. And nobody decided to create them: no
+single file looks guilty, yet the disk melts away.
+
+A few readings taken on the development machine, a workstation where several
+agents run in parallel:
+
+| Finding | Measurement |
+|---|---|
+| Accumulated build directories | **93.4 GB** across 26,007 folders |
+| Broken virtual environments, whose project had been moved | 8, for **8.6 GB** |
+| Browser code-signing clones left by a test suite | **1,715** clones, **3.3 million inodes** |
+| Temporary working directories never cleaned up | **14 GB** under `/var/folders` |
+| Tool and model caches | **23.9 GB** under `~/.cache` |
+
+The code-signing clones deserve a word, because they illustrate the problem
+well: a Playwright config with `channel: 'chrome'` launched the installed Chrome
+instead of the bundled Chromium. macOS makes an APFS clone of the bundle on
+every launch and never cleans it up. Two days of testing produced 1,715 clones —
+30 % of the volume's inodes, and a general slowdown of every disk analysis tool.
+No conventional cleaner looks there.
+
+DiskWatch cleans nothing. It **traces**: it samples free space every five
+minutes, measures the folders you point it at, and warns you the moment one of
+them grows — not three weeks later. What goes is your call.
+
+---
 
 Written in Swift with **no external dependencies**: AppKit, SwiftUI, Swift
 Charts and `du`. 1,892 lines, a **903 KB** binary.

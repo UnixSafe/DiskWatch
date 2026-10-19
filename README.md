@@ -6,8 +6,11 @@
 
 <sub>**Français** · [English](README.en.md)</sub>
 
-**Surveillance de l'espace disque dans la barre de menus macOS,
-avec alerte dès qu'un dossier se met à gonfler.**
+**Surveillance de l'espace disque dans la barre de menus macOS.**
+
+<sub>Traque ce que les agents IA laissent derrière eux — builds, caches,
+environnements virtuels, dossiers temporaires — et alerte dès qu'un dossier
+se met à gonfler.</sub>
 
 [![macOS 14+](https://img.shields.io/badge/macOS-14%2B-000000?logo=apple&logoColor=white)](https://www.apple.com/macos/)
 [![Swift 6](https://img.shields.io/badge/Swift-6-F05138?logo=swift&logoColor=white)](https://swift.org)
@@ -25,9 +28,44 @@ de build oublié, un cache qui ne se purge pas, une image Docker de plus. Quand
 l'avertissement de macOS arrive, il est trop tard pour savoir **qui** a pris la
 place.
 
-DiskWatch relève l'espace libre toutes les cinq minutes, mesure les dossiers que
-vous lui désignez, et vous prévient au moment où l'un d'eux grossit — pas trois
-semaines plus tard.
+## Pourquoi maintenant
+
+Depuis que des agents IA écrivent du code sur nos machines, ce phénomène a
+changé d'échelle.
+
+Une session d'agent installe des dépendances, compile, met en cache, crée un
+environnement virtuel, lance un navigateur de test, ouvre un dossier temporaire
+— puis se termine. Ce qu'elle a posé reste. Les artefacts sont souvent
+`gitignore`-és, donc invisibles à `git status`. Ils sont éparpillés sous
+`~/.cache`, `/var/folders`, `node_modules`, `.venv`, `target`, `dist`. Et
+personne ne les a décidés : aucun fichier ne paraît coupable, mais le disque
+fond.
+
+Quelques relevés faits sur la machine de développement, un poste où plusieurs
+agents travaillent en parallèle :
+
+| Constat | Mesure |
+|---|---|
+| Dossiers de build cumulés | **93,4 Go** répartis sur 26 007 dossiers |
+| Environnements virtuels cassés, dont le projet avait été déplacé | 8 pour **8,6 Go** |
+| Clones de signature d'un navigateur, laissés par une suite de tests | **1 715** clones, **3,3 millions d'inodes** |
+| Dossiers de travail temporaires jamais nettoyés | **14 Go** sous `/var/folders` |
+| Caches d'outils et de modèles | **23,9 Go** sous `~/.cache` |
+
+Le cas des clones de signature mérite un mot, parce qu'il illustre bien le
+problème : une configuration Playwright avec `channel: 'chrome'` lançait le
+Chrome installé au lieu du Chromium embarqué. macOS fabrique un clone APFS du
+bundle à chaque lancement et ne le nettoie jamais. Deux jours de tests ont
+produit 1 715 clones — soit 30 % des inodes du volume, et une lenteur générale
+de tous les outils d'analyse disque. Aucun outil de nettoyage classique ne
+regarde là.
+
+DiskWatch ne nettoie rien. Il **trace** : il relève l'espace libre toutes les
+cinq minutes, mesure les dossiers que vous lui désignez, et vous prévient au
+moment où l'un d'eux grossit — pas trois semaines plus tard. À vous de décider
+ce qui part.
+
+---
 
 Écrit en Swift, **sans aucune dépendance externe** : AppKit, SwiftUI,
 Swift Charts et `du`. 1 892 lignes, un binaire de **903 Ko**.
